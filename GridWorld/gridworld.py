@@ -65,7 +65,7 @@ class Gridworld(mdp.MarkovDecisionProcess):
         x,y = state
         if type(self.grid[int(np.floor(x))][int(np.floor(y))]) == int:
             return ('exit',)
-        return ('north','west','south','east')#,'northeast', 'northwest','southwest','southeast')
+        return ('north','west','south','east','northeast', 'northwest','southwest','southeast')
 
     def getStates(self):
         """
@@ -134,11 +134,11 @@ class Gridworld(mdp.MarkovDecisionProcess):
         if type(x) != int or type(y) != int:
 
             if type(x) != int:
-                if int(np.floor(x)) >= 0 and int(np.floor(x)) < self.grid.width:
-                  xInter.append((int(np.floor(x)),x - int(np.floor(x))))
+                if int(np.round(x+1)) >= 0 and int(np.round(x+1)) < self.grid.width:
+                  xInter.append((int(np.round(x+1)),x - int(np.round(x+1))))
 
-                if int(np.ceil(x)) >= 0 and int(np.ceil(x)) < self.grid.width:
-                  xInter.append((int(np.ceil(x)),int(np.ceil(x))-x))
+                if int(np.round(x-1)) >= 0 and int(np.round(x-1)) < self.grid.width:
+                  xInter.append((int(np.round(x-1)),int(np.round(x-1))-x))
 
 
             distance = 1000
@@ -148,11 +148,11 @@ class Gridworld(mdp.MarkovDecisionProcess):
                     distance = D
 
             if type(y) != int:
-                if int(np.floor(y)) >= 0 and int(np.floor(y)) < self.grid.height:
-                  yInter.append((int(np.floor(y)),y - int(np.floor(y))))
+                if int(np.round(y-1)) >= 0 and int(np.round(y-1)) < self.grid.height:
+                  yInter.append((int(np.round(y-1)),y - int(np.round(y-1))))
 
-                if int(np.ceil(y)) >= 0 and int(np.ceil(y)) < self.grid.height:
-                  yInter.append((int(np.ceil(y)),int(np.ceil(y)) - y))
+                if int(np.round(y+1)) >= 0 and int(np.round(y+1)) < self.grid.height:
+                  yInter.append((int(np.round(y+1)),int(np.round(y+1)) - y))
 
             distance = 1000
 
@@ -185,6 +185,7 @@ class Gridworld(mdp.MarkovDecisionProcess):
 
         x, y = state
 
+
         if type(self.grid[xD][yD]) == int or type(self.grid[xD][yD]) == float:
             termState = self.grid.terminalState
             return [(termState, 1.0)]
@@ -196,7 +197,7 @@ class Gridworld(mdp.MarkovDecisionProcess):
         southState = (self.__isAllowed(yD-1,xD) and (xD,yD-1)) or state
         eastState = (self.__isAllowed(yD,xD+1) and (xD+1,yD)) or state
 
-        ddd = 1/np.sqrt(2)
+        ddd = 1.3/np.sqrt(2)
         northEastState = (self.__isAllowedCustom(y+ddd,x+ddd) and (x+ddd,y+ddd)) or state
         northWestState = (self.__isAllowedCustom(y+ddd,x-ddd) and (x-ddd,y+ddd)) or state
         southWestState = (self.__isAllowedCustom(y-ddd,x-ddd) and (x-ddd,y-ddd)) or state

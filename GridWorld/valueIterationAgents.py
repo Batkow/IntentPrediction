@@ -86,19 +86,19 @@ class ValueIterationAgent(ValueEstimationAgent):
           yInter = []
 
           if type(x) != int:
-            if self.isAllowed(int(np.floor(x))):
-              xInter.append(int(np.floor(x)))
+            if self.isAllowed(int(np.round(x-1))):
+              xInter.append(int(np.round(x-1)))
 
-            if self.isAllowed(int(np.ceil(x))):
-              xInter.append(int(np.ceil(x)))
+            if self.isAllowed(int(np.round(x+1))):
+              xInter.append(int(np.round(x+1)))
 
 
           if type(y) != int:
-            if self.isAllowed(int(np.floor(y))):
-              yInter.append(int(np.floor(y)))
+            if self.isAllowed(int(np.round(y-1))):
+              yInter.append(int(np.round(y-1)))
 
-            if self.isAllowed(int(np.ceil(y))):
-              yInter.append(int(np.ceil(y)))
+            if self.isAllowed(int(np.round(y+1))):
+              yInter.append(int(np.round(y+1)))
           
 
           P = 0
@@ -199,6 +199,10 @@ class ValueIterationAgent(ValueEstimationAgent):
           for a in actions:
             qValueAndAction.append([self.getQValue(state,a), a])
 
+          # print "-------"
+          # print "state:", state
+          # print "Qvals:",qValueAndAction
+          # print "-------"
           # Return best action
           maxVal = max(qValueAndAction)[0]
           idx = [i for i, j in enumerate(qValueAndAction) if j[0] == maxVal]
