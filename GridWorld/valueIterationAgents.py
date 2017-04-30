@@ -13,7 +13,7 @@
 
 
 import mdp, util, copy, random
-
+import numpy as np
 from learningAgents import ValueEstimationAgent
 
 class ValueIterationAgent(ValueEstimationAgent):
@@ -68,12 +68,85 @@ class ValueIterationAgent(ValueEstimationAgent):
           self.values = copy.deepcopy(v)
 
 
+    def isAllowed(self,state):
+        if state >= 0 and state <= 9 : return True
+        return False
 
     def getValue(self, state):
         """
           Return the value of the state (computed in __init__).
         """
-        return self.values[state]
+        if state == "TERMINAL_STATE" or type(state[0]) == int or type(state[1]) == int:
+          return self.values[state]
+
+        else:
+
+          x,y = state
+          xInter = []
+          yInter = []
+
+          if type(x) != int:
+            if self.isAllowed(int(np.floor(x))):
+              xInter.append(int(np.floor(x)))
+
+            if self.isAllowed(int(np.ceil(x))):
+              xInter.append(int(np.ceil(x)))
+
+
+          if type(y) != int:
+            if self.isAllowed(int(np.floor(y))):
+              yInter.append(int(np.floor(y)))
+
+            if self.isAllowed(int(np.ceil(y))):
+              yInter.append(int(np.ceil(y)))
+          
+
+          P = 0
+
+
+          if len(xInter) < 2 and len(yInter) < 2:
+            P = self.values[(xInter[0],yInter[0])]
+            #print "Qvals", self.values[(xInter[0],yInter[0])]
+
+          elif len(xInter) < 2:
+            P = (yInter[1]-y) * self.values[(xInter[0],yInter[0])] + (y - yInter[0]) * self.values[(xInter[0],yInter[1])]
+            #print "Qvals", self.values[(xInter[0],yInter[0])],self.values[(xInter[0],yInter[1])]
+
+          elif len(yInter) < 2:
+            P = (xInter[1]-x) * self.values[(xInter[0],yInter[0])] + (x - xInter[0]) * self.values[(xInter[1],yInter[0])]
+            #print "Qvals", self.values[(xInter[0],yInter[0])],self.values[(xInter[1],yInter[0])]
+
+          else :
+            P = (xInter[1]-x)*(yInter[1]-y) * self.values[(xInter[0],yInter[0])] + \
+                (x - xInter[0])*(yInter[1]-y) * self.values[(xInter[1],yInter[0])] + \
+                (xInter[1]-x)*(y - yInter[0]) * self.values[(xInter[0],yInter[1])] + \
+                (x - xInter[0])*(y - yInter[0]) * self.values[(xInter[1],yInter[1])]
+            #print "Qvals", self.values[(xInter[0],yInter[0])],self.values[(xInter[1],yInter[0])],self.values[(xInter[0],yInter[1])],self.values[(xInter[1],yInter[1])]  
+
+          #print len(self.values)
+          return P
+
+
+
+
+
+
+    def interpolateClosestStates(self,state):
+      xLeft = int(np.floor(state[0]))
+      xRight = int(np.ceil(state[0]))
+
+      yUp = int(np.ceil(state[1]))
+      yDown = int(np.floor(state[1]))
+
+      states = []
+      states.append((xLeft,yUp))
+      states.append((xRight,yUp))
+      states.append((xLeft,yDown))
+      states.append((xRight,yDown))
+
+      return states
+
+
 
 
     def computeQValueFromValues(self, state, action):

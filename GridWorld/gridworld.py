@@ -59,17 +59,19 @@ class Gridworld(mdp.MarkovDecisionProcess):
         that "exit" states transition to the terminal
         state under the special action "done".
         """
+
         if state == self.grid.terminalState:
             return ()
         x,y = state
-        if type(self.grid[x][y]) == int:
+        if type(self.grid[int(np.floor(x))][int(np.floor(y))]) == int:
             return ('exit',)
-        return ('north','west','south','east','northeast', 'northwest','southwest','southeast')
+        return ('north','west','south','east')#,'northeast', 'northwest','southwest','southeast')
 
     def getStates(self):
         """
         Return list of all states.
         """
+
         # The true terminal state.
         states = [self.grid.terminalState]
         for x in range(self.grid.width):
@@ -87,10 +89,13 @@ class Gridworld(mdp.MarkovDecisionProcess):
         departed (as in the R+N book examples, which more or
         less use this convention).
         """
+
         if state == self.grid.terminalState:
             return 0.0
         x, y = state
-        cell = self.grid[x][y]
+
+        xD,yD = self.getClosestState(state)
+        cell = self.grid[xD][yD]
         if type(cell) == int or type(cell) == float:
             return cell
 
@@ -120,6 +125,48 @@ class Gridworld(mdp.MarkovDecisionProcess):
         return state == self.grid.terminalState
 
 
+    def getClosestState(self,state):
+
+        x,y = state
+        xInter = []
+        yInter = []
+
+        if type(x) != int or type(y) != int:
+
+            if type(x) != int:
+                if int(np.floor(x)) >= 0 and int(np.floor(x)) < self.grid.width:
+                  xInter.append((int(np.floor(x)),x - int(np.floor(x))))
+
+                if int(np.ceil(x)) >= 0 and int(np.ceil(x)) < self.grid.width:
+                  xInter.append((int(np.ceil(x)),int(np.ceil(x))-x))
+
+
+            distance = 1000
+            for X, D in xInter:
+                if D < distance:
+                    x = X
+                    distance = D
+
+            if type(y) != int:
+                if int(np.floor(y)) >= 0 and int(np.floor(y)) < self.grid.height:
+                  yInter.append((int(np.floor(y)),y - int(np.floor(y))))
+
+                if int(np.ceil(y)) >= 0 and int(np.ceil(y)) < self.grid.height:
+                  yInter.append((int(np.ceil(y)),int(np.ceil(y)) - y))
+
+            distance = 1000
+
+            for Y, D in yInter:
+                if D < distance:
+                    y = Y
+                    distance = D
+
+
+            return x,y
+
+        else:
+            return state
+
     def getTransitionStatesAndProbs(self, state, action):
         """
         Returns list of (nextState, prob) pairs
@@ -128,6 +175,8 @@ class Gridworld(mdp.MarkovDecisionProcess):
         with their transition probabilities.
         """
 
+        xD, yD = self.getClosestState(state)
+        
         if action not in self.getPossibleActions(state):
             raise "Illegal action!"
 
@@ -136,20 +185,22 @@ class Gridworld(mdp.MarkovDecisionProcess):
 
         x, y = state
 
-        if type(self.grid[x][y]) == int or type(self.grid[x][y]) == float:
+        if type(self.grid[xD][yD]) == int or type(self.grid[xD][yD]) == float:
             termState = self.grid.terminalState
             return [(termState, 1.0)]
 
         successors = []
 
-        northState = (self.__isAllowed(y+1,x) and (x,y+1)) or state
-        westState = (self.__isAllowed(y,x-1) and (x-1,y)) or state
-        southState = (self.__isAllowed(y-1,x) and (x,y-1)) or state
-        eastState = (self.__isAllowed(y,x+1) and (x+1,y)) or state
-        northEastState = (self.__isAllowed(y+1,x+1) and (x+1,y+1)) or state
-        northWestState = (self.__isAllowed(y+1,x-1) and (x-1,y+1)) or state
-        southWestState = (self.__isAllowed(y-1,x-1) and (x-1,y-1)) or state
-        southEastState = (self.__isAllowed(y-1,x+1) and (x+1,y-1)) or state
+        northState = (self.__isAllowed(yD+1,xD) and (xD,yD+1)) or state
+        westState = (self.__isAllowed(yD,xD-1) and (xD-1,yD)) or state
+        southState = (self.__isAllowed(yD-1,xD) and (xD,yD-1)) or state
+        eastState = (self.__isAllowed(yD,xD+1) and (xD+1,yD)) or state
+
+        ddd = 1/np.sqrt(2)
+        northEastState = (self.__isAllowedCustom(y+ddd,x+ddd) and (x+ddd,y+ddd)) or state
+        northWestState = (self.__isAllowedCustom(y+ddd,x-ddd) and (x-ddd,y+ddd)) or state
+        southWestState = (self.__isAllowedCustom(y-ddd,x-ddd) and (x-ddd,y-ddd)) or state
+        southEastState = (self.__isAllowedCustom(y-ddd,x+ddd) and (x+ddd,y-ddd)) or state
 
         if action == 'north' or action == 'south':
             if action == 'north':
@@ -200,6 +251,11 @@ class Gridworld(mdp.MarkovDecisionProcess):
         if y < 0 or y >= self.grid.height: return False
         if x < 0 or x >= self.grid.width: return False
         return self.grid[x][y] != '#'
+
+    def __isAllowedCustom(self, y, x):    
+        if y < 0 or y >= self.grid.height: return False
+        if x < 0 or x >= self.grid.width: return False
+        return True
 
 class GridworldEnvironment(environment.Environment):
 
