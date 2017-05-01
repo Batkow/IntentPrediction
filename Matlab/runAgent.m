@@ -12,8 +12,28 @@ X = x;
 u = [];
 for k = 1 : 2000
   xNew = Dynamics(x,actions,dt);
-  [maxVal,idx] = max(interp2(value,xNew(1,:),xNew(2,:)));
-  x = xNew(:,idx);
+  
+  vals = interp2(value,xNew(1,:),xNew(2,:));
+  allowedIdx = find(~isnan(vals));
+  
+  allowedX = xNew(:,allowedIdx);
+  allowedVals = vals(allowedIdx);
+  maxAllowedVal = max(vals);
+  
+  probs = exp(200*(allowedVals-maxAllowedVal));
+  totalProb = sum(probs);
+  cumProb = cumsum(probs/totalProb);
+  
+  r = rand;
+  idx = 1;
+  while r > cumProb(idx)
+    idx = idx +1;
+  end
+  
+  x = allowedX(:,idx);
+  
+  %[maxVal,idx] = max(vals);
+  %x = xNew(:,idx);
   X = [X x];
   if norm(x-[100;100])<1
     disp('breaking')
