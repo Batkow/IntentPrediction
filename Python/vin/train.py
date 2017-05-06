@@ -64,12 +64,13 @@ def test(net, testloader, config, use_GPU):
         X = Variable(X)
         outputs = net(X, config)
         prediction, label = outputs.squeeze().data.numpy(), labels.squeeze().numpy()
-        # out_img = np.concatenate((prediction, label), axis=1)
-        # print(out_img.shape)
-        # cv2.imwrite("result.png",out_img)
-    cv2.imshow('prediction', cv2.resize(prediction,(500,500)))
-    cv2.imshow('label', cv2.resize(label,(500,500)))
-    cv2.waitKey(0)
+        out_img = np.concatenate((cv2.resize(prediction, (500,500)), cv2.resize(prediction, (500,500))), axis=1)
+        if i == 10: # save an image to check
+            out_img = cv2.normalize(out_img, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+            cv2.imwrite("result.png",out_img)
+    # cv2.imshow('prediction', cv2.resize(prediction,(500,500)))
+    # cv2.imshow('label', cv2.resize(label,(500,500)))
+    # cv2.waitKey(0)
 
 
 
@@ -88,7 +89,7 @@ if __name__ == '__main__':
                         help='Size of image')
     parser.add_argument('--lr', 
                         type=float, 
-                        default=0.01, 
+                        default=0.005, 
                         help='Learning rate, [0.01, 0.005, 0.002, 0.001]')
     parser.add_argument('--epochs', 
                         type=int, 
