@@ -24,6 +24,6 @@ class GridworldData(data.Dataset):
 
     def _process(self, file, train):
    	  dataset = np.load(file)
-   	  inputs = dataset[:,0:3,:,:]
-   	  labels = dataset[:,3,:,:]
+   	  inputs = dataset[:,0:4,:,:]
+   	  labels = dataset[:,4,:,:]
    	  return inputs, labels

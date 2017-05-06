@@ -67,7 +67,7 @@ def test(net, testloader, config, use_GPU):
         out_img = np.concatenate((cv2.resize(prediction, (500,500)), cv2.resize(prediction, (500,500))), axis=1)
         if i == 10: # save an image to check
             out_img = cv2.normalize(out_img, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-            cv2.imwrite("result.png",out_img)
+            cv2.imwrite("result_28x28.png",out_img)
     # cv2.imshow('prediction', cv2.resize(prediction,(500,500)))
     # cv2.imshow('label', cv2.resize(label,(500,500)))
     # cv2.waitKey(0)
@@ -81,11 +81,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--datafile', 
                         type=str, 
-                        default='training_data.npy', 
+                        default='training_data_28x28.npy', 
                         help='Path to data file')
     parser.add_argument('--imsize', 
                         type=int, 
-                        default=10, 
+                        default=28, 
                         help='Size of image')
     parser.add_argument('--lr', 
                         type=float, 
@@ -97,11 +97,11 @@ if __name__ == '__main__':
                         help='Number of epochs to train')
     parser.add_argument('--k', 
                         type=int, 
-                        default=20, 
+                        default=50, 
                         help='Number of Value Iterations')
     parser.add_argument('--l_i', 
                         type=int, 
-                        default=3, 
+                        default=4, 
                         help='Number of channels in input layer')
     parser.add_argument('--l_h', 
                         type=int, 
@@ -118,8 +118,8 @@ if __name__ == '__main__':
     config = parser.parse_args()
 
     use_GPU = 0
-    # Get path to save trained model
-    #save_path = "trained/vin_{0}x{0}.pth".format(config.imsize) 
+    #Get path to save trained model
+    save_path = "trained/vin_{0}x{0}.pth".format(config.imsize) 
     # Instantiate a VIN model
     net = VIN(config)
     print(net)
@@ -131,6 +131,7 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(net.parameters(), lr = config.lr, betas=(0.9,0.999),eps=1e-08,weight_decay=0) #converges better
     train(net, trainloader, config, criterion, optimizer, use_GPU)
     test(net, testloader, config, use_GPU)
+    torch.save(net, save_path)
 
 
     

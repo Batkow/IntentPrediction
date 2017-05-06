@@ -10,7 +10,8 @@ import copy
 import sys
 import pickle
 
-img = plt.imread('10x10grid.png')
+#img = plt.imread('10x10grid.png')
+img = cv2.resize(plt.imread('../maps/cross_walk_multiple.png'),(28,28))
 
 def dynamics(x,u,dt):
 	xNext = np.array([x[0] + dt * np.cos(u),
@@ -37,6 +38,7 @@ def runValueIterations(name, gridSize, goalX,goalY):
 	R = np.zeros(img[:,:,0].shape)
 	R[rChannel] = -2
 	R[gChannel] = -0.5
+	R[bChannel] = -1 # will only be used if there are 3 features
 	R[goalY,goalX] = 0.0
 
 	value = R.copy()
@@ -61,10 +63,11 @@ def runValueIterations(name, gridSize, goalX,goalY):
 
 		value = valueNew.copy()
 
-	inp = np.zeros((3,gridHeight, gridWidth))
+	inp = np.zeros((4,gridHeight, gridWidth))
 	inp[0] = rChannel.astype(int)
 	inp[1] = gChannel.astype(int)
-	inp[2,goalY,goalX] = int(1)
+	inp[2] = bChannel.astype(int)
+	inp[3,goalY,goalX] = int(1)
 
 	label = value
 
@@ -81,16 +84,17 @@ def runValueIterations(name, gridSize, goalX,goalY):
 
 def makeTrainingData(gridSize = (10,10)):
 
-	dataset = np.zeros((gridSize[0] * gridSize[1],4,gridSize[0],gridSize[1]))
+	dataset = np.zeros((gridSize[0] * gridSize[1],5,gridSize[0],gridSize[1]))
 	for x in range(0,gridSize[0]):
 		for y in range(0,gridSize[1]):
 			name = str(x) + 'x' + str(y)
 			inputD, labelD = runValueIterations(name, gridSize, x, y)
 			#print(inputD.shape, labelD.shape)
-			dataset[x*gridSize[0] + y,0:3,:,:] = inputD
-			dataset[x*gridSize[0] + y, 3,:,:] = labelD
-	np.save('training_data.npy', dataset)
+			dataset[x*gridSize[0] + y,0:4,:,:] = inputD
+			dataset[x*gridSize[0] + y, 4,:,:] = labelD
+		print(x)
+	np.save('training_data_28x28.npy', dataset)
 	print('Done saving training data')
 
 
-makeTrainingData()
+makeTrainingData(gridSize = (28,28))
