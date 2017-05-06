@@ -127,7 +127,8 @@ if __name__ == '__main__':
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=config.batch_size, shuffle=True, num_workers=0)
     testloader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=True, num_workers=0) #use trainset shit, overfit
     criterion = nn.MSELoss()
-    optimizer = torch.optim.SGD(net.parameters(), lr = config.lr, momentum=0.9)
+    #optimizer = torch.optim.SGD(net.parameters(), lr = config.lr, momentum=0.9)
+    optimizer = torch.optim.Adam(net.parameters(), lr = config.lr, betas=(0.9,0.999),eps=1e-08,weight_decay=0) #converges better
     train(net, trainloader, config, criterion, optimizer, use_GPU)
     test(net, testloader, config, use_GPU)
 
