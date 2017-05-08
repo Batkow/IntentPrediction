@@ -25,14 +25,15 @@ def runAgent(map, value):
 	nSteps = 2000
 	actions = np.linspace(0,2*math.pi,nActions)
 	x = np.array([[1.1], [1.1]])
-	v = 1
-	dt = 1.0
+	v = 0.1
+	dt = 0.5
 	X = x
 	u = []
 	goal = np.where(map[-1] == 1)
-	for k in range(nSteps):
+	goal = [goal[0][0], goal[1][0]]
+	while(True):
 	  xNew = dynamics(x,actions,dt)
-	  vals = cv2.remap(value, xNew[0,:].astype('float32'), xNew[1,:].astype('float32'), cv2.INTER_LINEAR,borderValue = -1000)
+	  vals = cv2.remap(value, xNew[0,:].astype('float32'), xNew[1,:].astype('float32'), cv2.INTER_LINEAR, borderValue = -1000)
 	  maxVal = np.max(vals)
 	  probs = np.exp(1000.0*(vals-maxVal))
 	  totalProb = np.sum(probs)
@@ -82,12 +83,15 @@ def test(net, testloader, config, use_GPU):
         inputMap = Variable(X)
         outputs = net(inputMap, config)
         prediction, label = outputs.squeeze().data.numpy(), labels.squeeze().numpy()
+        print(label.max(), prediction.max())
+        print(label.min(), prediction.min())
         semanticMap = X.squeeze().numpy()
         trajPredicted = runAgent(semanticMap, prediction)
         trajOptimal = runAgent(semanticMap, label)
-        plt.imshow(label)
+        plt.imshow(prediction)
         plt.scatter(trajPredicted[0,:], trajPredicted[1,:],c='k',s=2)
         plt.scatter(trajOptimal[0,:], trajOptimal[1,:],c='m',s=2)
         plt.show()
+
 
 

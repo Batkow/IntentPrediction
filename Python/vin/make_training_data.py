@@ -23,7 +23,6 @@ def dynamics(x,u,dt):
 def runValueIterations(name, gridSize, goalX, goalY):
 
 	global img
-
 	gridHeight = gridSize[0]
 	gridWidth = gridSize[1]
 	nActions = 24
@@ -36,10 +35,10 @@ def runValueIterations(name, gridSize, goalX, goalY):
 	bChannel = (img[:,:,2] == 1)
 
 	R = np.zeros(img[:,:,0].shape)
-	R[rChannel] = -2
-	R[gChannel] = -0.5
-	R[bChannel] = -1 # will only be used if there are 3 features
-	R[goalY,goalX] = 1.0
+	R[rChannel] = -10
+	R[gChannel] = -1
+	R[bChannel] = -2 # will only be used if there are 3 features
+	R[goalY,goalX] = 10.0
 
 	value = R.copy()
 
@@ -70,7 +69,6 @@ def runValueIterations(name, gridSize, goalX, goalY):
 	inp[3,goalY,goalX] = int(1)
 
 	label = value
-
 	minValue, maxValue = np.min(label), np.max(label)
 	label = (label - minValue)/(maxValue - minValue)
 
