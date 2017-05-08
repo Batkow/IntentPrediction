@@ -38,14 +38,14 @@ def runAgent(map, value):
 	  probs = np.exp(1000.0*(vals-maxVal))
 	  totalProb = np.sum(probs)
 	  cumProb = np.cumsum(probs/totalProb)
-	  
+
 	  r = random.random()
 	  idx = 0
 	  while r > (cumProb[idx]):
 	  	idx += 1
-	  
+
 	  x = xNew[:,idx]
-	  
+
 	  X = np.append(X,[[x[0]],[x[1]]],axis=1)
 	  if (np.linalg.norm(x-goal) < 0.5): # 0.5 is good enough to see if it reaches goal
 	  	break
@@ -63,7 +63,7 @@ def checkValue(net, testloader, config, use_GPU):
             X = X.cuda()
         X = Variable(X)
         outputs = net(X, config)
-        prediction, label = outputs.squeeze().data.numpy(), labels.squeeze().numpy()
+        prediction, label = outputs.cpu().squeeze().data.numpy(), labels.squeeze().numpy()
         out_img = np.concatenate((cv2.resize(prediction, (500,500)), cv2.resize(prediction, (500,500))), axis=1)
         if i == 10: # save an image to check
             out_img = cv2.normalize(out_img, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
@@ -74,7 +74,7 @@ def checkValue(net, testloader, config, use_GPU):
 
 
 def test(net, testloader, config, use_GPU):
-    
+
     for i, data in enumerate(testloader): # Loop over batches of data
         X, labels = data
         X, labels = X.float(), labels.float()
@@ -82,7 +82,7 @@ def test(net, testloader, config, use_GPU):
             X = X.cuda()
         inputMap = Variable(X)
         outputs = net(inputMap, config)
-        prediction, label = outputs.squeeze().data.numpy(), labels.squeeze().numpy()
+        prediction, label = outputs.cpu().squeeze().data.numpy(), labels.squeeze().numpy()
         print(label.max(), prediction.max())
         print(label.min(), prediction.min())
         semanticMap = X.squeeze().numpy()
