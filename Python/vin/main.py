@@ -87,7 +87,7 @@ if __name__ == '__main__':
     criterion = nn.MSELoss()
     #optimizer = torch.optim.SGD(net.parameters(), lr = config.lr, momentum=0.9)
     optimizer = torch.optim.Adam(net.parameters(), lr = config.lr, betas=(0.9,0.999),eps=1e-08,weight_decay=0) #converges better
-    #train(net, trainloader, config, criterion, optimizer, use_GPU)
-    #checkValue(net, testloader, config, use_GPU)
-    test(net, testloader, config, use_GPU)
-    #torch.save(net, save_path)
+    train(net, trainloader, config, criterion, optimizer, use_GPU)
+    checkValue(net, testloader, config, use_GPU)
+    #test(net, testloader, config, use_GPU)
+    torch.save(net, save_path)
