@@ -90,4 +90,4 @@ if __name__ == '__main__':
     train(net, trainloader, config, criterion, optimizer, use_GPU)
     #checkValue(net, testloader, config, use_GPU)
     #test(net, testloader, config, use_GPU)
-    torch.save(net, save_path)
+    torch.save(net.cpu(), save_path)
