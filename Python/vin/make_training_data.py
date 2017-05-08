@@ -20,13 +20,13 @@ def dynamics(x,u,dt):
 
 
 
-def runValueIterations(name, gridSize, goalX,goalY):
+def runValueIterations(name, gridSize, goalX, goalY):
 
 	global img
 
 	gridHeight = gridSize[0]
 	gridWidth = gridSize[1]
-	nActions = 8
+	nActions = 24
 	discount = 0.99
      
 	actions = np.linspace(0,2*math.pi,nActions)
@@ -39,7 +39,7 @@ def runValueIterations(name, gridSize, goalX,goalY):
 	R[rChannel] = -2
 	R[gChannel] = -0.5
 	R[bChannel] = -1 # will only be used if there are 3 features
-	R[goalY,goalX] = 0.0
+	R[goalY,goalX] = 1.0
 
 	value = R.copy()
 
@@ -50,7 +50,7 @@ def runValueIterations(name, gridSize, goalX,goalY):
 				if ((xi == (goalX)) and (yi == (goalY))):
 					continue
 				Xnew = dynamics([xi, yi],actions,1)
-				vals = cv2.remap(value, Xnew[0,:].astype('float32'), Xnew[1,:].astype('float32'), cv2.INTER_NEAREST, borderValue = -1000)
+				vals = cv2.remap(value, Xnew[0,:].astype('float32'), Xnew[1,:].astype('float32'), cv2.INTER_LINEAR, borderValue = -1000)
 				#vals[vals == 0] = -1000 # temp fix for invalid locations
 				total = R[yi,xi] + discount * np.max(vals)
 				valueNew[yi,xi] = total
@@ -58,7 +58,7 @@ def runValueIterations(name, gridSize, goalX,goalY):
 		normError = np.linalg.norm(value-valueNew)
 		#print normError
 
-		if (normError < 0.0001):
+		if (normError < 0.1): # 0.1 is good enough
 			break
 
 		value = valueNew.copy()
@@ -74,9 +74,9 @@ def runValueIterations(name, gridSize, goalX,goalY):
 	minValue, maxValue = np.min(label), np.max(label)
 	label = (label - minValue)/(maxValue - minValue)
 
-	# #valueImage = cv2.resize(cv2.normalize(label, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F),(100,100)
-	# cv2.imshow('value', cv2.resize(inp[2],(100,100)))
-	# cv2.waitKey(1)
+	valueImage = cv2.resize(cv2.normalize(label, alpha=0, beta=1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F),(100,100))
+	cv2.imshow('value', cv2.resize(valueImage,(500,500)))
+	cv2.waitKey(1)
 
 	return inp, label
 
